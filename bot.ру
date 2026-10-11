@@ -1,0 +1,52 @@
+
+import os
+import asyncio
+from telegram import Update, ReplyKeyboardMarkup
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
+
+TOKEN = os.environ.get("BOT_TOKEN")
+
+keyboard = [
+    ["📅 Сегодня", "📆 Завтра"],
+    ["🗓 Вся неделя", "ℹ️ Помощь"],
+]
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🎓 Привет! Это бот «Расписание пар».\n"
+        "Группа: ОБ_Психол 1/25\n\n"
+        "Выбери нужный раздел:",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard, resize_keyboard=True
+        ),
+    )
+
+async def schedule(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Расписание твоей группы пока не добавлено.\n"
+        "Пришли расписание или его скриншоты, "
+        "и мы внесём пары и аудитории."
+    )
+
+async def main():
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, schedule)
+    )
+    print("Бот запущен!")
+    await app.initialize()
+    await app.start()
+    await app.updater.start_polling()
+    await asyncio.Event().wait()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+  
